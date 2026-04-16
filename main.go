@@ -19,8 +19,9 @@ var InMemoryDatabase map[string]User = map[string]User{"1": User{Id: "1", Firstn
 
 func main() {
 	mux := server.CreateServer()
-	mux.HandleFunc("GET /posts", server.LoggerMiddleware(getUsers))
-	mux.HandleFunc("POST /posts", createUser)
+	mux.HandleFunc("GET /users", server.LoggerMiddleware(getUsers))
+	mux.HandleFunc("POST /users", createUser)
+	mux.HandleFunc("GET /users/{id}", getUserById)
 	log.Println("Server starting on http://localhost:8080")
 	http.ListenAndServe(":8080", mux)
 }
@@ -48,4 +49,15 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	InMemoryDatabase[nextId] = user
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
+}
+
+func getUserById(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	user, exist := InMemoryDatabase[id]
+	if !exist {
+		http.Error(w, "User Not Found", http.StatusNotFound)
+		return
+	}
+	json.NewEncoder(w).Encode(user)
+
 }
