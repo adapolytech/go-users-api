@@ -23,6 +23,10 @@ func InternalServerError() APIError {
 	return APIError{Code: http.StatusInternalServerError, Message: http.StatusText(http.StatusInternalServerError)}
 }
 
-func NotAcceptableError() APIError {
-	return APIError{Code: http.StatusNotAcceptable, Message: http.StatusText(http.StatusNotAcceptable)}
+func NotAcceptableError(err any) APIError {
+	return APIError{Code: http.StatusNotAcceptable, Message: http.StatusText(http.StatusNotAcceptable), Err: err}
+}
+
+func BadRequestErro(err any) APIError {
+	return APIError{Code: http.StatusBadRequest, Message: http.StatusText(http.StatusBadRequest), Err: err}
 }
