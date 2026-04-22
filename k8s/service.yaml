@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-srv
+  namespace: dev
+  labels:
+    app: backend
+    lang: go
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    lang: go
+    app: backend
+  type: ClusterIP
