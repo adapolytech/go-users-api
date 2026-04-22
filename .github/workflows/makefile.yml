@@ -1,27 +1,26 @@
-name: Makefile CI
+name: Build And Push To Dockerhub
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: configure
-      run: ./configure
+      - name: build image
+        run: make build
 
-    - name: Install dependencies
-      run: make
+      - name: tag remote
+        run: make tag-remote
 
-    - name: Run check
-      run: make check
+      - name: login into dockerhub
+        run: make login
 
-    - name: Run distcheck
-      run: make distcheck
+      - name: push image
+        run: make push

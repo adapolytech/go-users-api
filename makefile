@@ -7,7 +7,7 @@ start:
 build: start
 	docker build -t $(IMAGE_TAG):$(IMAGE_TAG) .
 
-tag-remote: build
+tag-remote:
 	docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(REPOSITORY_NAME)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 login:
