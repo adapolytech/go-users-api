@@ -9,7 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      DOCKERHUB_USERNAME: ${{vars.DOCKERHUB_USERNAME}}
+      REPOSITORY_NAME: ${{vars.REPOSITORY_NAME}}
+      DOCKERHUB_PASSWORD: ${{secrets.DOCKERHUB_PASSWORD}}
     steps:
       - uses: actions/checkout@v4
 
