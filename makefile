@@ -11,7 +11,7 @@ tag-remote:
 	docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(REPOSITORY_NAME):$(IMAGE_TAG)
 
 login:
-	docker login -u $(DOCKERHUB_USERNAME) -p $(DOCKERHUB_PASSWORD) registry.hub.docker.com
+	@echo $(DOCKERHUB_PASSWORD) | docker login -u $(DOCKERHUB_USERNAME) --password-stdin
 
 push: login
 	docker push $(REPOSITORY_NAME):$(IMAGE_TAG)

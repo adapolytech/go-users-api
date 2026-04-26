@@ -23,8 +23,5 @@ jobs:
       - name: tag remote
         run: make tag-remote
 
-      - name: login into dockerhub
-        run: make login
-
       - name: push image
         run: make push
