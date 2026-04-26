@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: dockerhub_env
     env:
       DOCKERHUB_USERNAME: ${{vars.DOCKERHUB_USERNAME}}
       REPOSITORY_NAME: ${{vars.REPOSITORY_NAME}}
