@@ -1,12 +1,21 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"time"
 
-	"github.com/adapolytech/go_rest_api/packages/server"
+	"github.com/adapolytech/go_rest_api/pkg/database"
+	"github.com/adapolytech/go_rest_api/pkg/handlers"
+	"github.com/adapolytech/go_rest_api/pkg/middlewares"
+	"github.com/adapolytech/go_rest_api/pkg/server"
 )
 
 type User struct {
@@ -15,21 +24,29 @@ type User struct {
 	Lastname  string `json:"lastname"`
 }
 
-var InMemoryDatabase map[string]User = map[string]User{"1": User{Id: "1", Firstname: "TheNuulest", Lastname: "Developer"}}
+var InMemoryDatabase map[string]User = map[string]User{"1": User{"1", "TheNuulest", "Developer"}}
 
 func main() {
+	_, database, err := database.CreateClient()
+	if err != nil {
+		log.Fatal("Cannot create database connection")
+	}
 	mux := server.CreateServer()
-	mux.HandleFunc("GET /users", server.LoggerMiddleware(getUsers))
-	mux.HandleFunc("POST /users", createUser)
-	mux.HandleFunc("GET /users/{id}", getUserById)
+	UserService := handlers.NewUserHandler(database)
+	mux.Handle("GET /users", middlewares.AuthMiddleware(UserService.GetUsers))
+	mux.HandleFunc("POST /users", UserService.Register)
+	mux.HandleFunc("GET /users/export", UserService.ExportUserToCSVFile)
+	mux.HandleFunc("GET /users/external/{id}", UserService.GetExternalUserById)
+	mux.HandleFunc("GET /users/{id}", UserService.GetUserById)
 	log.Println("Server starting on http://localhost:8080")
-	http.ListenAndServe(":8080", mux)
+	httpServer := http.Server{Addr: ":8080", Handler: mux, ReadTimeout: time.Second * 30}
+	httpServer.ListenAndServe()
 }
 
 func getUsers(w http.ResponseWriter, r *http.Request) {
 	data := make([]User, 0, len(InMemoryDatabase))
-	for key, _ := range InMemoryDatabase {
-		data = append(data, InMemoryDatabase[key])
+	for _, user := range InMemoryDatabase {
+		data = append(data, user)
 	}
 	w.Header().Add("Content-Type", "Application/json")
 	w.WriteHeader(http.StatusOK)
@@ -60,4 +77,23 @@ func getUserById(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(user)
 
+}
+
+func PrintFileContent(path string) {
+
+	file, err := os.OpenFile(path, os.O_RDONLY, os.FileMode(os.O_RDONLY))
+
+	if err != nil {
+		fmt.Printf("Cannot open file %s", err.Error())
+	}
+
+	reader := bufio.NewReader(file)
+
+	for {
+		inputString, readerError := reader.ReadString('\n')
+		if errors.Is(readerError, io.EOF) {
+			return
+		}
+		fmt.Printf("The input was: %s", inputString)
+	}
 }
